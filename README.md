@@ -7,6 +7,19 @@ backends that go offline, and adds them back when they recover.
 Built on **Netty** for the networking core, with **picocli** for the CLI and
 **SLF4J/Logback** for logging. Java 17, built with Maven.
 
+## Requirements
+
+| Requirement | Where it's met |
+|---|---|
+| Operate at layer 4 (TCP) | `FrontendHandler` / `BackendHandler` relay raw bytes without parsing the protocol |
+| Accept traffic from many clients | `LoadBalancerServer` — Netty NIO event loop multiplexing connections, accept backlog, `--max-connections` cap |
+| Balance traffic across multiple backends | `BackendPool.select()` with `RoundRobinStrategy` / `LeastConnectionsStrategy`, over healthy backends only |
+| Remove a service when it goes offline | `HealthChecker` (active probes, rise/fall) plus passive failover in `FrontendHandler.connectWithFailover()` |
+| No cloud services | pure local JVM + libraries; nothing external |
+
+`LoadBalancerIntegrationTest` exercises the three core behaviours directly: even
+distribution, removal of an offline backend, and re-admission on recovery.
+
 ## What it does
 
 - **Handles many clients at once.** Netty's NIO event loop multiplexes all
