@@ -17,8 +17,12 @@ Built on **Netty** for the networking core, with **picocli** for the CLI and
 | Remove a service when it goes offline | `HealthChecker` (active probes, rise/fall) plus passive failover in `FrontendHandler.connectWithFailover()` |
 | No cloud services | pure local JVM + libraries; nothing external |
 
-`LoadBalancerIntegrationTest` exercises the three core behaviours directly: even
-distribution, removal of an offline backend, and re-admission on recovery.
+`LoadBalancerIntegrationTest` exercises the three core behaviours end to end
+against a real Netty server: even distribution, removal of an offline backend,
+and re-admission on recovery. Unit tests cover the supporting logic in isolation
+— the `Backend` rise/fall health state machine, both balancing strategies
+(including round-robin's counter wraparound), `BackendPool` health filtering,
+`HostPort` parsing, and `LbConfig` validation.
 
 ## What it does
 
